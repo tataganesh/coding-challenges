@@ -6,16 +6,34 @@
 #include <cwchar>
 struct Text_Counts
 {
-    int character_count{0};
-    int line_count{0};
-    int word_count{0};
+    int characters{0}, lines{0}, words{0};
 };
 
-std::string to_string_custom(int count)
+struct Text_Count_Flags
 {
-    if (count == 0)
-        return "";
-    return std::to_string(count) + " ";
+    bool characters{false}, lines{false}, words{false}, multibyte_characters{false};
+    bool no_flags_set()
+    {
+        return !(characters || lines || words || multibyte_characters);
+    }
+};
+
+std::string counts_to_string(Text_Counts counts, const Text_Count_Flags &count_flags)
+{
+    std::string output_string;
+    if (count_flags.lines)
+    {
+        output_string += std::to_string(counts.lines) + " ";
+    }
+    if (count_flags.words)
+    {
+        output_string += std::to_string(counts.words) + " ";
+    }
+    if (count_flags.characters || count_flags.multibyte_characters)
+    {
+        output_string += std::to_string(counts.characters) + " ";
+    }
+    return output_string;
 }
 
 std::istream &get_input_stream(const std::string &filepath)
@@ -31,29 +49,25 @@ std::istream &get_input_stream(const std::string &filepath)
     }
     else
     {
+        // return stdin stream if filepath is empty
         return std::cin;
     }
 }
-Text_Counts get_text_counts(std::istream &input_stream, bool count_multibytechar_flag, bool count_char_flag, bool count_line_flag, bool count_word_flag)
+Text_Counts get_text_counts(std::istream &input_stream, const Text_Count_Flags &count_flags)
 {
     std::mbstate_t state = std::mbstate_t(); // initial state for mbrtowc
-    // If none of the flags are passed, use all flags
-    if (!(count_multibytechar_flag || count_char_flag || count_line_flag || count_word_flag))
-    {
-        count_char_flag = count_word_flag = count_line_flag = true;
-    }
     Text_Counts counts;
     std::string line, word;
     // Iterate through each line of input stream
     while (std::getline(input_stream, line))
     {
-        if (count_line_flag)
+        if (count_flags.lines)
         {
-            ++counts.line_count;
+            ++counts.lines;
         }
-        if (count_char_flag || count_multibytechar_flag)
+        if (count_flags.characters || count_flags.multibyte_characters)
         {
-            if (count_multibytechar_flag)
+            if (count_flags.multibyte_characters)
             {
                 // Count multi-byte characters
                 const char *ptr = line.c_str();
@@ -64,22 +78,22 @@ Text_Counts get_text_counts(std::istream &input_stream, bool count_multibytechar
                 while ((len = std::mbrtowc(&wc, ptr, end - ptr, &state)) > 0)
                 {
                     ptr += len;
-                    ++counts.character_count;
+                    ++counts.characters;
                 }
-                ++counts.character_count;
+                ++counts.characters;
             }
             else
             {
-                counts.character_count += line.length() + 1;
+                counts.characters += line.length() + 1;
             }
         }
 
-        if (count_word_flag)
+        if (count_flags.words)
         {
             std::stringstream ss(line);
             while (ss >> word)
             {
-                ++counts.word_count;
+                ++counts.words;
             }
         }
     }
@@ -93,21 +107,24 @@ int main(int argc, char *argv[])
     CLI::App app{"wc command to count characters, word and lines"};
     argv = app.ensure_utf8(argv);
 
-    bool count_char_flag{false};
-    app.add_flag("-c", count_char_flag, "Count Characters")->take_last();
-    bool count_multibytechar_flag{false};
-    app.add_flag("-m", count_multibytechar_flag, "Count Multi-Byte Characters")->take_last();
-    bool count_line_flag{false};
-    app.add_flag("-l", count_line_flag, "Count Lines")->take_last();
-    bool count_word_flag{false};
-    app.add_flag("-w", count_word_flag, "Count Words")->take_last();
+    Text_Count_Flags count_flags;
+    app.add_flag("-c", count_flags.characters, "Count Characters")->take_last();
+    app.add_flag("-m", count_flags.multibyte_characters, "Count Multi-Byte Characters")->take_last();
+    app.add_flag("-l", count_flags.lines, "Count Lines")->take_last();
+    app.add_flag("-w", count_flags.words, "Count Words")->take_last();
 
     std::string filepath;
     app.add_option("filepath", filepath, "Input file path");
     CLI11_PARSE(app, argc, argv);
+
+    // If none of the flags are passed, use all flags
+    if (count_flags.no_flags_set())
+    {
+        count_flags.characters = count_flags.words = count_flags.lines = true;
+    }
     std::istream &input_stream = get_input_stream(filepath);
-    Text_Counts output = get_text_counts(input_stream, count_multibytechar_flag, count_char_flag, count_line_flag, count_word_flag);
-    std::string output_string = to_string_custom(output.line_count) + to_string_custom(output.word_count) + to_string_custom(output.character_count) + filepath;
+    Text_Counts counts = get_text_counts(input_stream, count_flags);
+    std::string output_string = counts_to_string(counts, count_flags) + filepath;
     std::cout << output_string;
     return 0;
 }
