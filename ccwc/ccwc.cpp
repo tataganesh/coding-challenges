@@ -18,7 +18,7 @@ struct Text_Count_Flags
     }
 };
 
-std::string counts_to_string(Text_Counts counts, const Text_Count_Flags &count_flags)
+std::string counts_to_string(const Text_Counts &counts, const Text_Count_Flags &count_flags)
 {
     std::string output_string;
     if (count_flags.lines)
