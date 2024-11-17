@@ -20,3 +20,8 @@ cat test.txt | /path/to/file.txt # With STDIN
 ```
 
 For more information about the command-line arguments, run `./build/ccwc  --help`. 
+
+
+### External Code Review(s)
+
+* [Basic C++ implementation of linux wc command](https://codereview.stackexchange.com/questions/294364/basic-c-implementation-of-linux-wc-command) - Code Review Stack Exchange
