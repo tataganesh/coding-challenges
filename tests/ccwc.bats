@@ -5,15 +5,21 @@ setup_file() {
     # Create temporary build directory
     TMP_DIR=$(mktemp -d --tmpdir=$WORKING_DIR)
     TMP_BUILD_DIR="$TMP_DIR/build"
+
     # Create build files
     cmake -S "$WORKING_DIR/../ccwc/" -B $TMP_BUILD_DIR
+
     # Compile
     cmake --build $TMP_BUILD_DIR
+
     # Set path to executable
     EXECUTABLE="$TMP_BUILD_DIR/ccwc"
-    # Export variables for all tests
 
-    export WORKING_DIR EXECUTABLE TMP_DIR
+    # Set path to test file
+    TEST_FILE="$WORKING_DIR/../ccwc/test.txt"
+
+    # Export variables for all tests
+    export WORKING_DIR EXECUTABLE TMP_DIR TEST_FILE
 }
 
 setup(){
@@ -25,32 +31,65 @@ teardown_file() {
     rm -rf $TMP_DIR
 }
 
+## All flags tests
 @test "Test ALL Flags" {
-    input_file_path=$WORKING_DIR/../ccwc/test.txt
-    run $EXECUTABLE $input_file_path
-    assert_output "7145 58164 342190 $input_file_path"
+    run $EXECUTABLE $TEST_FILE
+    assert_output "7145 58164 342190 $TEST_FILE"
 }
 
-@test "Test line check" {
-    input_file_path=$WORKING_DIR/../ccwc/test.txt
-    run $EXECUTABLE -l $input_file_path
-    assert_output "7145 $input_file_path"
+@test "Test ALL Flags (explicit)" {
+    run $EXECUTABLE -l -c -w $TEST_FILE
+    assert_output "7145 58164 342190 $TEST_FILE"
 }
 
-# @test "can run our script" {
-#     input_file_path=$WORKING_DIR/../ccwc/test.txt
-#     run $EXECUTABLE_PATH $input_file_path
-#     assert_output "7145 58164 342190 $input_file_path"
-# }
+## Single flag tests
+@test "Test lines" {
+    run $EXECUTABLE -l $TEST_FILE
+    assert_output "7145 $TEST_FILE"
+}
 
-# @test "can run our script" {
-#     input_file_path=$WORKING_DIR/../ccwc/test.txt
-#     run $EXECUTABLE_PATH $input_file_path
-#     assert_output "7145 58164 342190 $input_file_path"
-# }
+@test "Test bytes" {
+    run $EXECUTABLE -c $TEST_FILE
+    assert_output "342190 $TEST_FILE"
+}
 
+@test "Test words" {
+    run $EXECUTABLE -w $TEST_FILE
+    assert_output "58164 $TEST_FILE"
+}
 
-### Todo
+## Two flag tests
+@test "Test words and lines" {
+    run $EXECUTABLE -w -l $TEST_FILE
+    assert_output "7145 58164 $TEST_FILE"
+}
 
-### Run using other tests cases. You can also create your own files/stdin.
-### Importantly test different flags, 
+@test "Test words and bytes" {
+    run $EXECUTABLE -w -c $TEST_FILE
+    assert_output "58164 342190 $TEST_FILE"
+}
+
+@test "Test lines and bytes" {
+    run $EXECUTABLE -c -l $TEST_FILE
+    assert_output "7145 342190 $TEST_FILE"
+}
+
+## STDIN tests
+# bats test_tags=stdin
+@test "Test ALL Flags (STDIN)" {
+    run bash -c "$EXECUTABLE < $TEST_FILE"
+    assert_output "7145 58164 342190 "
+}
+
+# bats test_tags=stdin
+@test "Test bytes and lines (STDIN)" {
+    run bash -c "$EXECUTABLE -c -l < $TEST_FILE"
+    assert_output "7145 342190 "
+}
+
+# bats test_tags=stdin
+@test "Test lines (STDIN)" {
+    run bash -c "$EXECUTABLE -l < $TEST_FILE"
+    assert_output "7145 "
+}
+
