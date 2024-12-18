@@ -1,6 +1,12 @@
 ## ccwc
 
-Count words, lines and character (single byte or multi-byte) in a text file or standard input. 
+Coding Challenge: [Build your own wc tool](https://codingchallenges.fyi/challenges/challenge-wc/)
+
+Count words, lines and character (single byte or multi-byte) in a text file or standard input. Similar behaviour as the [linux wc tool](https://linux.die.net/man/1/wc). 
+
+### External Dependencies
+
+* [CLI11](https://github.com/CLIUtils/CLI11) - Installed via CMake
 
 ### Build ccwc
 
