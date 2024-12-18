@@ -21,6 +21,10 @@ cat test.txt | /path/to/file.txt # With STDIN
 
 ### Run tests using bats-core
 
+> [!IMPORTANT] 
+> Make sure to run `git submodule update --init --recursive` before running the tests
+
+
 ```bash
 ../bats-core/bats/bin/bats test_ccwc.bats
 
@@ -38,8 +42,6 @@ test_ccwc.bats
  ✓ Test bytes and lines (STDIN)
  ✓ Test lines (STDIN)
 ```
-
-### 
 
 For more information about the command-line arguments, run `./build/ccwc  --help`. 
 
