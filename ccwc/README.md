@@ -27,7 +27,7 @@ cat test.txt | /path/to/file.txt # With STDIN
 For more information about the command-line arguments, run `./build/ccwc  --help`. 
 
 
-### Run tests using bats-core
+### Run tests using [bats-core](https://bats-core.readthedocs.io/en/stable/)
 
 > [!IMPORTANT] 
 > Make sure to run `git submodule update --init --recursive` before running the tests
