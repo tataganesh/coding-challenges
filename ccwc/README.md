@@ -18,6 +18,8 @@ cat test.txt | /path/to/file.txt # With STDIN
 ## Expected output
 ## 7145 58164 342190 test.txt
 ```
+For more information about the command-line arguments, run `./build/ccwc  --help`. 
+
 
 ### Run tests using bats-core
 
@@ -42,9 +44,6 @@ test_ccwc.bats
  ✓ Test bytes and lines (STDIN)
  ✓ Test lines (STDIN)
 ```
-
-For more information about the command-line arguments, run `./build/ccwc  --help`. 
-
 
 ### External Code Review(s)
 
