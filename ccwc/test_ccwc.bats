@@ -7,7 +7,7 @@ setup_file() {
     TMP_BUILD_DIR="$TMP_DIR/build"
 
     # Create build files
-    cmake -S "$WORKING_DIR/../ccwc/" -B $TMP_BUILD_DIR
+    cmake -S $WORKING_DIR -B $TMP_BUILD_DIR
 
     # Compile
     cmake --build $TMP_BUILD_DIR
@@ -16,15 +16,15 @@ setup_file() {
     EXECUTABLE="$TMP_BUILD_DIR/ccwc"
 
     # Set path to test file
-    TEST_FILE="$WORKING_DIR/../ccwc/test.txt"
+    TEST_FILE="$WORKING_DIR/test.txt"
 
     # Export variables for all tests
     export WORKING_DIR EXECUTABLE TMP_DIR TEST_FILE
 }
 
 setup(){
-    load 'test_helper/bats-support/load'
-    load 'test_helper/bats-assert/load'
+    load '../bats-core/test_helper/bats-support/load'
+    load '../bats-core/test_helper/bats-assert/load'
 }
 
 teardown_file() {
